@@ -1,0 +1,883 @@
+
+
+/**
+ * Represents the configuration settings for an AI program.
+ */
+class AIConfig{
+	constructor(){
+		this.AIName = "Aliza"
+		this.help = "I am a medical bot who can help you with consultations and appointments. I can also analyze your symptoms and give you a diagnosis."
+	}
+}
+
+var aiConfig = new AIConfig()
+
+
+
+function Rchoice(...items){
+	// return a random choice from the given items
+	
+	let blank = 0
+	if (items == undefined){
+		return ""
+	}
+	if (typeof items[items.length - 1] == typeof 0){
+		blank = items.pop()
+	}
+	
+	let id = Math.floor(Math.random() * items.length + blank);
+	if (id >= items.length){
+		return ""
+	}
+	let choice = items[id];
+
+	return choice
+}
+
+// console.log(Rchoice("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", blank = 2))
+
+
+
+class DataAnalyzer {
+	constructor() {
+		let specials = [
+			"-", "[", "]", "/", "{", "}", "(", ")", "*", "+", "?", "."
+			, "\\", "^", "$", "|"]
+		this.specials_regex = RegExp('[' + specials.join('\\') + ']', 'g')
+
+
+		this.ints = [
+			"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"
+		]
+
+		this.fields = []
+
+	}
+
+
+	escapeRegExp() {
+		// will make sure if the command has any special characters, it will be escaped
+		// these characters should be escaped
+		// \ ^ $ * + ? . ( ) | { } [ ]
+
+		// I choose to escape every character with '\'
+		// even though only some strictly require it when inside of []
+
+
+		return str.replace(this.specials_regex, "\\$&");
+	};
+
+
+	isNumeric(str) {
+		if (typeof str != "string") return false // we only process strings!  
+		return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+			!isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+	}
+
+
+	// I'm making them both, use at your need
+	converter(data, type) {
+		// type can be "text" or "number|int"
+
+		data = data.toLowerCase()
+		data = this.isNumeric(data) ? parseInt(data) : data
+
+		if (type == "text") {
+			return this.ints[data]
+		}
+
+		let out = this.ints.indexOf(data)
+		if (out == -1) {
+			return data
+		}
+		return out
+	}
+
+	/**
+	 * Returns a JSON object with the given name, value, and message.
+	 *
+	 * @param {string} name - The name of the value being returned.
+	 * @param {any} value - The value being returned.
+	 * @param {string} [message=''] - An optional message to include with the returned value.
+	 * @returns {Object} A JSON object with the given name, value, and message.
+	 */
+	returner(name, value, message = '') {
+		// will return json data to return
+
+		return {
+			name: name,
+			value: value,
+			message: message
+		}
+	}
+
+
+
+	/**
+	 * Searches for a regular expression in a given text and returns the matching groups.
+	 * If the regular expression is an array, it will search for each regular expression in the array until it finds a match.
+	 *
+	 * @param {string} text - The text to search for the regular expression.
+	 * @param {RegExp|string[]} regex - The regular expression to search for. If it is an array, it will search for each regular expression in the array until it finds a match.
+	 * @returns {Object|null} The matching groups found in the text, or null if no match was found.
+	 */
+	getGroup(text, regex) {
+		if (typeof regex == typeof [1, 2]) {
+
+			for (const reg of regex) {
+				let group = this.getGroup(text, reg)
+				if (group) {
+					return group
+				}
+			}
+			return null
+		}
+
+
+		let group = null;
+		regex = new RegExp(regex, "ig")
+
+
+		for (const match of text.matchAll(regex)) {
+			if (match) {
+				group = match.groups
+				break
+			}
+		}
+		return group
+	}
+
+	/**
+	 * Extracts text from a given string using a regular expression and returns it as a JSON object with the given name.
+	 * 
+	 * @param {string} text - The text to extract from.
+	 * @param {string} name - The name of the extracted text.
+	 * @param {RegExp} regex - The regular expression to use for extracting the text.
+	 * @param {string} invalid - An error message to return if the extracted text is invalid.
+	 * @param {number} [min=0] - The minimum length of the extracted text.
+	 * @param {number} [max=-1] - The maximum length of the extracted text. If set to -1, there is no maximum length.
+	 * @returns {Object|null} A JSON object with the extracted text and its name, or null if the extracted text is invalid.
+	 */
+	textExtractor(text, name, regex, invalid, min = 0, max = -1) {
+		let group = this.getGroup(text, regex)
+		if (group && group.value) {
+			let value = group.value
+			
+			if (value.length < min) {
+				return this.returner(name, null, "Must be at least 8 characters")
+			} else if (max >= 0 && value.length > max) {
+				return this.returner(name, null, "Must be less than 20 characters")
+			}
+			return this.returner(name, value)
+		} else {
+			return null
+
+		}
+	}
+
+	/**
+	 * Extracts a number from a given string using a regular expression and returns it as a JSON object with the given name.
+	 * 
+	 * @param {string} text - The text to extract from.
+	 * @param {string} name - The name of the extracted number.
+	 * @param {RegExp} regex - The regular expression to use for extracting the number.
+	 * @param {string} invalid - An error message to return if the extracted number is invalid.
+	 * @param {number} [min=0] - The minimum value of the extracted number.
+	 * @param {number} [max=-1] - The maximum value of the extracted number. If set to -1, there is no maximum value.
+	 * @returns {Object|null} A JSON object with the extracted number and its name, or null if the extracted number is invalid.
+	 */
+	sliderExtractor(text, name, regex, invalid, min = 0, max = -1) {
+		let group = this.getGroup(text, regex)
+		if (group && group.value) {
+			var value = this.converter(group.value, "number")
+
+			if (value < min || isNaN(value) || (max >= 0 && value > max)) {
+				return this.returner(name, null, `You must set a number between ${min} and ${max}`)
+			}
+			return this.returner(name, group.value)
+		} else {
+			return null
+
+		}
+	}
+
+	/**
+	 * Extracts a boolean value from a given string using a regular expression and returns it as a JSON object with the given name.
+	 * 
+	 * @param {string} text - The text to extract from.
+	 * @param {string} name - The name of the extracted boolean value.
+	 * @param {Object} regex - The regular expression to use for extracting the boolean value.
+	 * @param {string} invalid - An error message to return if the extracted value is invalid.
+	 * @returns {Object|null} A JSON object with the extracted boolean value and its name, or null if the extracted value is invalid.
+	 */
+	checkboxExtractor(text, name, regex, invalid) {
+		var values = []
+		for (const key in regex) {
+			let reg = regex[key];
+			let group = this.getGroup(text, reg)
+			if (group) {
+				values.push(key)
+			}
+		}
+
+		if (values.length == 0) {
+			return null
+		}
+
+		return this.returner(name, values)
+	}
+
+	/**
+	 * Extracts selected options from a given string using a regular expression and returns them as a JSON object with the given name.
+	 * 
+	 * @param {string} text - The text to extract from.
+	 * @param {string} name - The name of the extracted options.
+	 * @param {Object[]} options - An array of objects containing the label and value of each option.
+	 * @param {string} invalid - An error message to return if no options were selected.
+	 * @returns {Object|null} A JSON object with the extracted options and their name, or null if no options were selected.
+	 */
+	selectExtractor(text, name, options, invalid) {
+		var values = []
+
+
+		options.forEach((option) => {
+			let label = option.label
+			let value = option.value
+			regex = new RegExp(`(?<invert>(not )?)${label}`, "ig")
+			let bool = this.getGroup(text, regex)
+			if (bool && !bool.invert) {
+				values.push(value)
+			}
+		})
+
+		if (values.length == 0 && invalid) {
+			return this.returner(name, null, invalid)
+		}
+
+		return this.returner(name, values)
+	}
+
+	emailValidator(email, name, invalid) {
+		var re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
+		if (re.test(email)) {
+			return this.returner(name, email)
+		}
+		return this.returner(name, null, invalid);
+	}
+
+
+
+	/**
+	 * Extracts information from the given text based on the specified type and name.
+	 * @param {string} text - The text to extract information from.
+	 * @param {string} type - The type of information to extract (e.g. "text", "comment").
+	 * @param {string} name - The name of the information to extract (e.g. "clinician_name", "patient_name").
+	 * @returns {string} - The extracted information, if found.
+	 */
+	extractor(text, type, name) {
+		// remove "I want to", "can you please" etc
+		let __you = "(((yo)?u|y[ao]) ?)" // you, ya, yo
+		let __my = "(my |the )"
+		let can_will_you_please = `((can|will) ${__you}(please )?)`
+		let i_want_to = `(i want|I'd like) ${__you}?to ` // i want to, i'd like to, i want you to, i'd like you to
+		let set_fix = `(set|fix|change|make|put|turn|adjust|keep)`
+		let mark_fix = `(mark|set|check|tick|select)`
+
+		// CASE clinician_name
+		var regex = "";
+		let invalid = "Invalid Text"
+
+
+		if (type == "text" || type == "comment") {
+
+			let min = 8
+			let max = 20
+
+			if (name == "clinician_name") {
+				regex = [`name ((wa|i)s|of ${__my}?(doctor|clinician|physician|nurse|nurse practitioner) (wa|i)s) (?<value>.+)`,
+						`(?<value>.+) (wa|i)s ${__my}?(doctor|clinician|physician|nurse|nurse practitioner)('?s | )?name`,
+						`${set_fix} ${__my}?(doctor|clinician|physician|nurse|nurse practitioner) name ((wa|i)s )?(?<value>.+)`
+				] 
+				// name was of my doctor is john
+
+			}
+
+			// CASE patient_name
+			if (name == "patient_name") {
+				regex = [`name ((wa|i)s|of ${__my}?(patient |person )?(wa|i)s) (?<value>.+?)`,
+						`(?<value>.+?) (wa|i)s ${__my}?(patient|person)('?s | )?name`,
+						`${set_fix} ${__my}?(patient|person)('?s)? name (((wa|i)s|to|at|in) )?(?<value>.+)`
+				]
+				// name was of my patient is john
+				// John was my patient's name
+
+			}
+
+			// CASE treatment_schedule
+			if (name == "treatment_schedule") {
+				regex = [`(schedule|frequency|time|timing) (is )?(on )?(?<value>.+)`,
+						`${set_fix} ${__my}?treatment (schedule|frequency|time|timing) (((wa|i)s|to|at|in) )?(?<value>.+)`,
+						`(?<value>.+) (wa|i)s ${__my}?treatment schedule`,
+				]
+				// its twice a week
+
+			}
+
+			// CASE wound_type
+			if (name == "wound_type") {
+				regex = [`it('s| is|seems|looks) (like )?((type|kinda?) (is |of )?)?(?<value>.+)`,
+						`${set_fix} ${__my}?wound (type|kind) (((wa|i)s|to|at|in) )?(?<value>.+)`
+				]
+				// its kinda swollen
+
+			}
+
+			// CASE record_wound_dimensions
+			if (name == "record_wound_dimensions") {
+				regex = [`(wound|it) (size )?(is )?(?<value>.+)`,
+						`${set_fix} ${__my}?wound (size|dimensions) (((wa|i)s|to|at|in) )?(?<value>.+)`
+				]
+
+			}
+
+			// CASE voltage
+			if (name == "voltage") {
+				regex = [`voltage ((wa|i)s )?(?<value>.+)`,
+						`${set_fix} ${__my}?voltage (((wa|i)s|to|at|in) )?(?<value>.+)`
+				]
+
+			}
+
+			// CASE current
+			if (name == "current") {
+				regex = [`current ((wa|i)s )?(?<value>.+)`,
+						`${set_fix} ${__my}?current (((wa|i)s|to|at|in) )?(?<value>.+)`
+				]
+
+			}
+
+			// CASE treatment_duration
+			if (name == "treatment_duration") {
+				regex = [`treatment (wa|i)s (running )?(?<value>.+)`,
+						`${set_fix} ${__my}?treatment (duration|time) (((wa|i)s|to|at|in) )?(?<value>.+)`
+				]
+				// the treatment is running for 10 days
+
+			}
+
+			// CASE pulse_frequency
+			if (name == "pulse_frequency") {
+				regex = [`pulse (frequency|rate) ((wa|i)s )?(?<value>.+)`,
+						`${set_fix} ${__my}?pulse (frequency|rate) (((wa|i)s|to|at|in) )?(?<value>.+)`
+				]
+				// my pulse frequency is 100
+
+			}
+
+			// CASE plaster_saturation
+			if (name == "plaster_saturation") {
+				regex = [`plaster (saturation|wetness|color) ((wa|i)s )?(?<value>.+)`,
+						`plaster (wa|i)s (?<value>.+)`,
+						`${set_fix} ${__my}?plaster (saturation|wetness|color) (((wa|i)s|to|at|in) )?(?<value>.+)`
+				]
+				//  my plaster is wet
+				// my plaster is red
+				// my plaster color is red
+
+			}
+
+			// CASE has_patient_reported_additional_symptoms
+			if (name == "has_patient_reported_additional_symptoms") {
+				regex = [`(patient|i|.*?) ((w|h)as |had )(?<value>.+)`,
+						`${set_fix} ${__my}?(patient|i|.*?)? ?(additional symptoms )?((w|h)as |had )(?<value>.+)`]
+				// i was having a headache
+
+			}
+
+			// CASE clinician_log
+			if (name == "clinician_log") {
+				regex = [`logs? ((wa|i)s|are) (?<value>.+)`,
+						`${set_fix} ${__my}?(doctor|clinician|physician|nurse|nurse practitioner)? ?logs? (((wa|i)s|to|at|in)|are) (?<value>.+)`]
+
+			}
+
+
+			if (name == "describe_your_symptoms_here") {
+				regex = [`symptoms? ((wa|i)s|are) (?<value>.+)`,
+						`${set_fix} ${__my}?symptoms? (((wa|i)s|to|at|in)|are) (?<value>.+)`
+				]
+						// set my symptoms are headache
+			}
+
+
+
+
+
+
+
+			return this.textExtractor(text, name, regex, invalid, min, max)
+		}
+
+		if (type == "slider") {
+
+
+			let min = 1
+			let max = 5
+
+			// CASE swelling
+			if (name == "swelling") {
+				regex = [`swelling (level|scale) ((wa|i)s )?(of )?(?<value>.+)`,
+					`${set_fix} ${__my}?swelling (level|scale) (((wa|i)s|to|at|in) (about )?)?(?<value>.+)`]
+
+			}
+
+			// CASE pain_level
+			if (name == "pain_level") {
+				regex = [`pain (level|scale) (((wa|i)s|to|at|in) )?(of )?(?<value>(\\d+|one|two|three|four|five|six|seven|eight|nine|ten))`,
+					`${set_fix} ${__my}?pain (level|scale) (((wa|i)s|to|at|in) (about )?)?(?<value>(\\d+|one|two|three|four|five|six|seven|eight|nine|ten))`]
+
+
+			}
+
+			return this.sliderExtractor(text, name, regex, invalid, min, max)
+
+		}
+
+		if (type == "checkbox") {
+
+			if (name == "wound_opening") {
+				regex = {
+					"0" : [`(wound|it) (is|was) (open|clos)(e|ed|ing)`,
+						`${mark_fix} ${__my}?wound (is|was)? ?(open|clos)(e|ed|ing)`
+					]
+				}
+			}
+
+			if (name == "healthy_regrowth_of_skin") {
+				regex = {
+					"0": [`(wound|it) (is|was) (heal|healthy|healing)|the skin (is|was) (heal|healthy|healing|growing)`,
+						`${mark_fix} ${__my}?wound (is|was)? ?(heal|healthy|healing)|the skin (is|was) (heal|healthy|healing|growing)`
+			]}
+			}
+
+			if (name == "throbbing") {
+				regex = {
+					"0": [`(wound|it) (is|was) throbbing`,
+						`${mark_fix} ${__my}?wound (is|was)? throbbing`
+				]}
+			}
+
+			if (name == "smelly_discharge") {
+				regex = {
+					"0": [`(wound|it) (is|was) (smell|smelly|smelling|discharge|discharging)`,
+						`${mark_fix} ${__my}?wound (is|was)? ?(smell|smelly|smelling|discharge|discharging)`
+				]}
+			}
+
+			return this.checkboxExtractor(text, name, regex, invalid)
+		}
+
+		if (type == "select" || type == "checkboxormultiple") {
+
+			let options = []
+			let invalid = "You must select an option"
+
+			if (name == "discolouration") {
+				options = [
+					{
+						"label": "Yellow",
+						"value": "1"
+					}, {
+						"label": "Red",
+						"value": "2"
+					}, {
+						"label": "Brown",
+						"value": "3"
+					}, {
+						"label": "Black",
+						"value": "4"
+					}
+				]
+
+				regex = new RegExp(`(wound|it) (is|was) |${mark_fix} ${__my}?wound (is|was)? ?|discoloration `, "ig")
+
+			}
+
+
+			if (!regex.test(text)) return null;
+
+			return this.selectExtractor(text, name, options, invalid)
+		}
+
+		if (type == "email") {
+
+			let invalid = "Not a valid email"
+			// CASE email
+			if (name == "email") {
+				regex = `email (address|id|account)? ((wa|i)s )?(?<value>.+)|${set_fix} email (address|id|account) (((wa|i)s|to|at|in) )?(?<value>.+)`
+
+				regex = new RegExp(regex, "ig")
+
+				let bool = this.getGroup(text, regex)
+				if (bool && bool.value) {
+					return this.emailValidator(bool.value, name, invalid)
+				}
+				return null;
+			}
+		}
+
+
+
+
+
+	}
+
+	matchREGEX(text, regex) {
+		regex = new RegExp(regex, "ig")
+		// console.log(regex)
+		// console.log(text)
+		// console.log(regex.test(text))
+		return regex.test(text)
+	}
+
+
+	casualChat(text) {
+		var that = this;
+		var C = (reg) => {
+			return that.matchREGEX(text, reg)
+		}
+		// Checks if theres a match
+
+		
+		let __you = "(((yo)?u|y[ao]) ?)" // you, ya, yo
+
+
+		// CASE greeting
+		if (C(/(hi|hello|hey|good morning|good afternoon|good evening|good day|greetings|good day)/i)) {
+			return "Greeting"
+		}
+
+		// CASE goodbye
+		if (C(`bye|goodbye|see you|see ${__you}|take care|farewell|have a (good|wonderful|nice) .*|good night`)) {
+			return "Goodbye"
+		}
+
+		// CASE thanks
+		if (C(`thank|thanks|thank ${__you}|ty|thx|tysm`)) {
+			return "You're Welcome"
+		}
+
+		// CASE how are you
+		if (C(`how[' ]?a?re? ${__you}( doing?)?( today| now)?`)) {
+			return "I'm doing well, thank you for asking"
+		}
+
+		// CASE what's up
+		if (C(`wh?(u|a)t?( |')?s+ up+|^sup$`)) {
+			return "Nothing much"
+		}
+
+		// CASE what's your name
+		if (C(`wh?(u|a)t?( |')?s+ ${__you}r name|what are ${__you} called|who a?re? ${__you}`)) {
+			return Rchoice("My name is ", "I am ",
+			"Its ", "Call me ", "You can call me ") + `${aiConfig.AIName}`
+		}
+
+		// CASE what is the time
+		if (C(`wh?(u|a)t?( |')?s+ the time|what time is it|what is the current time`)) {
+			return "The time is " + `${new Date().toLocaleTimeString()}`
+		}
+
+		// CASE what is the date
+		if (C(`wh?(u|a)t?( |')?s+ the date|what date is it|what is the current date`)) {
+			return "The date is " + `${new Date().toLocaleDateString()}`
+		}
+
+	}
+
+
+
+
+
+
+	/**
+	 * Converts a spoken text into a command based on the given fields.
+	 * 
+	 * @param {string} speech - The spoken text to convert into a command.
+	 * @param {Object[]} fields - An array of objects containing the fields to extract from the spoken text.
+	 * @returns {string|null} The extracted command, or null if no command was found.
+	 */
+	convertSpeechTextToCommand(speech, fields) {
+		//change my * to *
+
+		//get spoken labels and spoken values -- 
+
+		//loop through fields and test to see if label is spoken
+		let value = this.casualChat(speech);
+		if (value) {
+			value = this.returner("chat", value)
+			value.intent = "casual"
+			return value;
+		}
+
+		for (let i = 0; i < fields.length; i++) {
+			let name = fields[i].name;
+			let type = fields[i].type;
+
+			let value = this.extractor(speech, type, name);
+
+			if (value) {
+				value.intent = "form"
+				return value;
+			}
+
+		}
+
+
+		return null;
+	}
+
+
+}
+
+
+
+
+
+var dataAnalyzer = new DataAnalyzer();
+var fields = [
+	// SCHEME 1
+	{
+		"type": "text",
+		"name": "clinician_name",
+		"label": "Clinician Name",
+		// "validation": yup.string().min(8, 'Must be at least 8 characters').max(20, 'Must be less  than 20 characters').required("Text field is required"),
+		"placeholder": "Text field",
+		//"disabled": true,
+	},
+	{
+		"type": "text",
+		"name": "patient_name",
+		"label": "Patient Name",
+		// "validation": yup.string().min(8, 'Must be at least 8 characters').max(20, 'Must be less  than 20 characters').required("Text field is required"),
+		"placeholder": "Text field",
+		//"disabled": true,
+	},
+	{
+		"type": "text",
+		"name": "treatment_schedule",
+		"label": "Treatment Schedule",
+		// "validation": yup.string().min(8, 'Must be at least 8 characters').max(20, 'Must be less  than 20 characters').required("Text field is required"),
+		"placeholder": "Text field",
+		//"disabled": true,
+	},
+	{
+		"type": "text",
+		"name": "wound_type",
+		"label": "Wound Type",
+		// "validation": yup.string().min(8, 'Must be at least 8 characters').max(20, 'Must be less  than 20 characters').required("Text field is required"),
+		"placeholder": "Text field",
+		//"disabled": true,
+	},
+	{
+		"type": "text",
+		"name": "record_wound_dimensions",
+		"label": "Record Wound Dimensions",
+		// "validation": yup.string().min(8, 'Must be at least 8 characters').max(20, 'Must be less  than 20 characters').required("Text field is required"),
+		"placeholder": "Text field",
+		//"disabled": true,
+	},
+	{
+		"type": "text",
+		"name": "voltage",
+		"label": "Voltage",
+		// "validation": yup.string().min(8, 'Must be at least 8 characters').max(20, 'Must be less  than 20 characters').required("Text field is required"),
+		"placeholder": "Text field",
+		//"disabled": true,
+	},
+	{
+		"type": "text",
+		"name": "current",
+		"label": "Current",
+		// "validation": yup.string().min(8, 'Must be at least 8 characters').max(20, 'Must be less  than 20 characters').required("Text field is required"),
+		"placeholder": "Text field",
+		//"disabled": true,
+	},
+	{
+		"type": "text",
+		"name": "treatment_duration",
+		"label": "Treatment Duration",
+		// "validation": yup.string().min(8, 'Must be at least 8 characters').max(20, 'Must be less  than 20 characters').required("Text field is required"),
+		"placeholder": "Text field",
+		//"disabled": true,
+	},
+	{
+		"type": "text",
+		"name": "pulse_frequency",
+		"label": "Pulse Frequency",
+		// "validation": yup.string().min(8, 'Must be at least 8 characters').max(20, 'Must be less  than 20 characters').required("Text field is required"),
+		"placeholder": "Text field",
+		//"disabled": true,
+	},
+	{
+		"type": "text",
+		"name": "pulse_length",
+		"label": "Pulse Length",
+		// "validation": yup.string().min(8, 'Must be at least 8 characters').max(20, 'Must be less  than 20 characters').required("Text field is required"),
+		"placeholder": "Text field",
+		//"disabled": true,
+	},
+	{
+		"type": "text",
+		"name": "plaster_saturation",
+		"label": "Plaster Saturation",
+		// "validation": yup.string().min(8, 'Must be at least 8 characters').max(20, 'Must be less  than 20 characters').required("Text field is required"),
+		"placeholder": "Text field",
+		//"disabled": true,
+	},
+	{
+		"type": "text",
+		"name": "has_patient_reported_additional_symptoms",
+		"label": "Has patient reported additional symptoms",
+		// "validation": yup.string().min(8, 'Must be at least 8 characters').max(20, 'Must be less  than 20 characters').required("Text field is required"),
+		"placeholder": "Text field",
+		//"disabled": true,
+	},
+	{
+		"type": "comment",
+		"name": "clinician_log",
+		"label": "Clinician log",
+		// "validation": yup.string().min(8, 'Must be at least 8 characters').max(20, 'Must be less  than 20 characters').required("Text field is required"),
+		"placeholder": "Text field",
+		//"disabled": true,
+		"charLimit": 700,
+	},
+
+	// SCHEME 3
+	{
+		"type": "slider",
+		"name": "swelling",
+		"label": "Swelling",
+		"min": 1,
+		"max": 5,
+		// "validation": yup.number().required("slider is required"),
+	},
+	{
+		"type": "slider",
+		"name": "pain_level",
+		"label": "Pain level",
+		"min": 1,
+		"max": 5,
+		// "validation": yup.number().required("slider is required"),
+	},
+	{
+		"type": "checkbox",
+		"name": "wound_opening",
+		"label": "Wound opening",
+		"options": [
+			{
+				"label": "Yes",
+				"value": "0",
+				//"disabled": true
+			}
+		],
+		//"validation": yup.mixed().test('arraySize', "Must have at least one checked", value => value.length > 0),
+		//"disabled": true          
+	},
+	{
+		"type": "checkbox",
+		"name": "healthy_regrowth_of_skin",
+		"label": "Healthy regrowth of skin",
+		"options": [
+			{
+				"label": "Yes",
+				"value": "0",
+				//"disabled": true
+			}
+		],
+		//"validation": yup.mixed().test('arraySize', "Must have at least one checked", value => value.length > 0),
+		//"disabled": true
+	},
+	{
+		"type": "checkbox",
+		"name": "throbbing",
+		"label": "Throbbing",
+		"options": [
+			{
+				"label": "Yes",
+				"value": "0",
+				//"disabled": true
+			}
+		],
+		//"validation": yup.mixed().test('arraySize', "Must have at least one checked", value => value.length > 0),
+		//"disabled": true
+	},
+	{
+		"type": "checkbox",
+		"name": "smelly_discharge",
+		"label": "Smelly discharge",
+		"options": [
+			{
+				"label": "Yes",
+				"value": "0",
+				//"disabled": true
+			}
+		],
+		//"validation": yup.mixed().test('arraySize', "Must have at least one checked", value => value.length > 0),
+		//"disabled": true
+	},
+	{
+		//"disabled": true,
+		"type": "select",
+		"name": "discolouration",
+		"label": "Discolouration",
+		"options": [
+			{
+				"label": "Yellow",
+				"value": "1"
+			}, {
+				"label": "Red",
+				"value": "2"
+			}, {
+				"label": "Brown",
+				"value": "3"
+			}, {
+				"label": "Black",
+				"value": "4"
+			}
+		],
+		// "validation": yup.string().required("Minimum discolouration value is required"),
+		//"disabled": true
+	},
+	{
+		"type": "comment",
+		"name": "describe_your_symptoms_here",
+		"label": "Describe your symptoms here",
+		// "validation": yup.string().min(8, 'Must be at least 8 characters').max(20, 'Must be less  than 20 characters').required("Text field is required"),
+		"placeholder": "Text field",
+		//"disabled": true,
+		"charLimit": 700,
+	},
+]
+
+function textAnalysis(text){
+	console.log("\n" + text);
+	let data = dataAnalyzer.convertSpeechTextToCommand(text, fields);
+	process.stdout.write(" >> "); // prints without newline
+	console.log(data);
+}
+
+
+const speech = [
+	"I want to change my pain level to 3 please, I'm dieing",
+	"change my description to my wound is getting bigger and there is a lot of pain what do I do next to avoid this.", // theres no description field
+	"patient had a headache",
+	"patients name is john smith",
+	"how are you",
+	"whats the time",
+	"who are u",
+]
+
+for (let i = 0; i < speech.length; i++) {
+	textAnalysis(speech[i]);
+}

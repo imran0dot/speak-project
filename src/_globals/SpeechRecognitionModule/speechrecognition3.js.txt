@@ -1,0 +1,49 @@
+import React, { useState } from "react";
+import HomePage from "./Home";
+import BlogPage from "./Blog";
+import NewBlogPostPage from "./NewBlogPost";
+import ContactPage from "./Contact";
+
+
+import { BrowserRouter, Route, Link, Redirect } from "react-route-router";
+
+import SpeechRecognition, {
+	useSpeechRecognition,
+} from "react-speech-recognition";
+
+function App() {
+
+	const commands = [
+		{
+			command: ["Go to *", "Open *"],
+			callback: (redirectPage) => setRedirectUrl(redirectPage)
+		}
+	]
+
+	const {transcript} = useSpeechRecognition({commands});
+	const [redirectUrl, setRedirectUrl] = useState("");
+
+	return (
+		<div className="App">
+			<BrowserRouter>
+				<div id="links">
+					<Link to="/">Home</Link>
+					<Link to="/blog">Blog</Link>
+					<Link to="/blog/new">Add a Blog post</Link>
+					<Link to="/contact">Contact</Link>
+				</div>
+				<Route path="/" exact component={HomePage} />
+				<Route path="/home" exact component={HomePage} />
+				<Route path="/blog" exact component={BlogPage} />
+				<Route path="/blog/new" exact component={NewBlogPostPage} />
+				<Route path="/contact" exact component={ContactPage} />
+
+
+				<p id="transcript">Transcript: {transcript}</p>
+				<button onClick={SpeechRecognition.startListening}>Start</button>
+
+	
+			</BrowserRouter>
+		</div>
+	)
+}

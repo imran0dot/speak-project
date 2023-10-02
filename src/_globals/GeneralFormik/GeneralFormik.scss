@@ -1,0 +1,621 @@
+@import '../../../colors.scss';
+
+.MuiDayPicker-slideTransition .MuiDayPicker-weekContainer {
+    .MuiPickersDay-root.Mui-selected{
+        background-color: #ef7e60;
+    }
+}
+
+
+.MuiAutocomplete-popper {
+    .MuiAutocomplete-listbox {
+        .MuiAutocomplete-option{          
+            font-family: "Roboto Serif", sans-serif;
+            font-size: 13px;
+
+            &:hover{
+                background: #f4ede7;
+            }
+
+            &[aria-selected="true"] {
+                background: #ef7e60;
+
+                &.Mui-focused {
+                    background-color: #d9e3a6;
+                }
+            }
+        }
+    }
+}
+
+.MuiPaper-root{
+    .MuiList-root li{
+        font-family: "Roboto Serif", sans-serif;
+        font-size: 13px;
+
+
+        &:hover{
+            background: #f4ede7;
+        }
+
+        &[aria-selected="true"] {
+            background: #ef7e60;
+
+            &.Mui-focused {
+                background-color: #d9e3a6;
+            }
+        }            
+    }
+
+    .PrivatePickersYear-yearButton,
+    .MuiPickersCalendarHeader-labelContainer,
+    .MuiTypography-root.MuiDayPicker-weekDayLabel,
+    .MuiPickersDay-root{
+        font-family: "Roboto Serif", sans-serif;
+    }
+
+}
+
+
+
+
+.MuiPopover-root {
+    .MuiPaper-root{
+        .Mui-checked{
+            color: #ef7e60;
+        }
+        .MuiPaper-root{
+            padding: 5px 15px;
+        }
+    }
+}
+
+.googlemapsfield{
+    width: 280px;
+    height: 280px;
+}
+
+
+.wizard-formik,
+.general-formik{
+    font-family: "Roboto Serif", sans-serif;
+
+    &.inline{
+        padding: 0;
+    }
+
+    &.inline .field {
+        display: inline-block;
+        //background: #f75036; 
+        
+        padding: 5px 10px;
+        //padding: 5px 22px;
+        margin-right: 5px;
+        overflow: hidden;
+
+        .MuiFormGroup-root .MuiFormControlLabel-root,
+        .MuiFormGroup-root fieldset{
+            width: auto;
+        }
+    }
+
+    .field-text,
+    .field-email,
+    .field-password,
+    .field-date{
+        height: 70px;
+    }
+    .field-checkbox{
+        //height: 98px;
+    }
+    .field-select{
+        height: 104px;
+    }
+
+    .field-comment{
+        height: 196px;
+    }
+
+    .field-decrement_increment{
+        height: 94px;
+    }
+
+    .field-multiple-popup-checkbox{
+        .field-array{
+            margin: 0;
+            padding: 0;
+        }
+    }
+
+    .field-radio{
+        .Mui-checked{
+            color: #ef7e60;
+        }
+    }
+
+    .field-combo_select_knob{
+        .row-solo{
+            overflow: hidden;
+        }
+
+        .col-el-x:nth-child(1){
+            display: inline-block;
+            width: 80%;
+            //background: red;
+            float: left;           
+        }
+        .col-el-x:nth-child(2){
+            display: inline-block;
+            float: right;
+            //background: blue;        
+        }
+
+
+        .col-x {
+            //display: inline-block;
+        }
+
+        .donut{
+            color: #ef7e60;
+            overflow: hidden;
+
+            > div {
+                width: 74px;
+
+                > div {
+                    float: right;
+
+                    div:nth-child(1){
+                        //background: #ef7e60;
+                    }
+                    div:nth-child(2){
+                        //background: blue;
+                    }                     
+                }
+            }
+ 
+
+            .donut-label{
+                display: block;
+                width: 100%;
+                float: right;
+                text-align: right;
+            }
+        }
+    }
+
+	.field-toggle_text{
+	    p{
+            margin: 0;
+            display: inline-block;
+            padding-right: 10px;
+	    }
+        .MuiAutocomplete-root,
+        .MuiFormControl-root{
+            width: 94%;
+            margin-right:15px;
+            margin-top:15px;
+            display: inline-block;
+        }
+        a {
+            color: #ef7e60;
+            cursor: pointer;
+        }
+
+        .field-range_date{
+            width: 94%;
+            display: inline-block;
+            .MuiFormControl-root{
+                width: 100%;
+                margin: 0;
+            }
+        }
+
+        .MuiFormHelperText-root{
+            display: block;
+        }
+
+	}
+
+
+    p.MuiFormHelperText-root{
+        padding-top:10px;
+    }
+
+    .field-range_date,
+    .field-range_text{
+        .field-array {
+            margin: 0px 0 15px 0;
+        }
+        .row-solo{
+            overflow: auto;
+            padding-top: 10px;
+
+            .col-x{
+                float: left;
+                padding-right: 4px;
+                .bottomline{
+                   padding-top: 9px;
+                }
+            }
+        }
+	}
+
+    .MuiFormControlLabel-root{
+        margin: 0;
+    }
+
+    /*
+    .MuiButtonBase-root.MuiButton-containedSecondary {
+        margin-right: 15px;
+
+        background: $silver
+        color: $white;
+
+        span {
+            color: #ef7e60;
+            border-radius: 7px;
+        }
+
+        &.Mui-disabled{
+            color: $black;
+            box-shadow: none;
+            background: $black;
+        }
+    }
+
+
+    .MuiButtonBase-root.MuiButton-containedPrimary {
+        margin-right: 15px;
+
+        background: transparent;
+        color: #ef7e60;
+
+        span {
+            border: 1px solid #ef7e60;
+            color: #ef7e60;
+            border-radius: 7px;
+        }
+    }
+    */
+
+    .field-hidden{
+        display: none;
+    }
+
+	.field{
+	    &.field-hidden{
+	        display: none;
+	    }
+
+	    margin: 12px 0;
+	    padding: 5px 0;
+
+        .MuiFormLabel-root{
+
+        }
+
+        .MuiTypography-root{
+            font-family: "Roboto Serif", sans-serif;
+            color: #0e0e0e;
+            font-size: 15px;
+        }
+
+	    legend,
+	    label{
+            //font-size: 12px;
+            color: #ef7e60;
+            font-family: "Roboto Serif", sans-serif;
+	        //font-weight: bold;
+	        //color: $charcoal;
+	    }
+
+        &.field-decrement_increment,
+        &.field-buttons,
+        &.field-rating,
+        &.field-checkbox,
+        &.field-toggle_text,
+        &.field-range_date,
+        &.field-multiple-popup-checkbox,
+        &.field-range_text,
+        &.field-select,
+        &.field-radio,
+        &.field-popup-checkbox,
+        &.field-popup-radio,
+        &.field-multiple, 
+        &.field-toggle_group,
+        &.field-checkboxormultiple,
+        &.field-toggle,
+        &.field-slider{
+            legend,
+            label{
+                color: #0e0e0e;            
+            }
+        }
+
+        &.field-heatmap_calendar{
+            .heatmap_calendar_header{
+                //background:red;
+
+                button{
+                    //width: 40px;
+                    //background: blue;
+                }
+                h2 {
+                    width: 225px;
+                }
+
+                h2,
+                button{
+                    display: inline-block;
+                }
+            }
+        }
+
+        &.field-polygon_man{
+
+        }
+
+        .MuiSwitch-thumb{
+            background: #ffffff;
+        }
+
+        .Mui-checked{
+            .MuiSwitch-thumb{
+                background: #ef7e60;
+            }      
+        }
+
+        .MuiCheckbox-root{
+            &.Mui-checked {
+                color: #ef7e60;
+            }        
+        }
+
+
+	    .MuiFormGroup-root {
+	        fieldset,
+	        .MuiFormControlLabel-root{
+	            width: 100%;
+	        }
+	    }
+
+        .MuiInputBase-root{
+            margin-bottom: -8px;
+            border-radius: 8px;
+            font-family: "Roboto Serif", sans-serif;
+
+            input{
+                padding: 11px 14px;
+            }
+	    }
+
+	    &.field-array{
+	        .row{
+                margin: 25px 0;
+                border: 1px dashed $black;
+                padding: 0px 10px;
+
+	            .col{
+	                margin: 20px 0;
+	            }
+	        }
+	    }
+	}
+
+
+    .MuiCheckbox-root{
+        color: #ef7e60;
+    }
+
+
+    .MuiRating-root {
+        .MuiRating-iconFilled{
+            color: #ef7e60;
+        }
+    }
+
+    .MuiSwitch-root {
+        .Mui-checked+.MuiSwitch-track {
+            background-color: #ef7e60;
+        }
+        .MuiSwitch-track{
+            //background-color: $green;
+        }
+    }
+
+	.MuiSlider-root {
+        color: #ef7e60;
+
+        .MuiSlider-track{
+    	   color: #ef7e60;
+        }
+
+        .MuiSlider-thumb {
+            color: #ef7e60;
+
+            &:hover{
+                box-shadow: 0px 0px 0px 8px rgba(239, 126, 96, 0.16);
+            }
+
+            /*&.Mui-focusVisible:after{
+                background: rgba(239, 126, 96, 0.16);
+            }*/
+        }
+
+        .MuiSlider-thumb.Mui-focusVisible, 
+        .MuiSlider-thumb:hover {
+            box-shadow: 0px 2px 1px -1px rgba(239, 126, 96,0.2), 0px 1px 1px 0px rgba(239, 126, 96,0.14), 0px 1px 3px 0px rgba(239, 126, 96,0.12);        
+        }
+        /*.MuiSlider-thumb.Mui-focusVisible, .MuiSlider-thumb:hover {
+            box-shadow:none !important;
+        }*/
+
+	}
+
+
+    .MuiSlider-valueLabel{
+        background: #f4ede7;
+        color: #ef7e60;
+    }
+
+	.MuiButtonGroup-root {
+        .MuiButtonBase-root{
+            color: #ef7e60;
+            border: 1px solid #ef7e60;
+
+            &.Mui-disabled {
+                color: rgba(0, 0, 0, 0.26);
+            }
+        }
+
+	    .MuiButton-outlined {
+	        border-radius: 15px;
+	    }
+
+		.MuiButtonGroup-groupedOutlinedPrimary:hover {
+		    color: #ef7e60;
+		    border: 1px solid #ef7e60;
+		}
+
+		.selected {
+		    color: $white;
+		    background-color: #ef7e60;
+		}
+	}
+
+	.previewIcon{
+	    margin-top:10px;
+	}
+
+
+    &.light{
+        background: #ffffff;
+    }
+
+    &.dark{
+        background: #333333;
+
+        
+        .field {
+            color: #ffffff;
+
+            label{
+                color: #ffffff;
+            }
+
+            input {
+                color: #ffffff;
+            }
+
+            legend{
+                color: #ffffff;
+            }
+
+            .MuiFormHelperText-root{
+                color: rgba(255, 255, 255, 0.6);
+                &.Mui-error {
+                    color: #d32f2f;
+                }
+            }
+
+            .MuiChip-root{
+                background-color: rgba(255, 255, 255, 0.08);
+            }
+
+            .MuiChip-deleteIcon{
+                color: rgba(255, 255, 255, 0.26);
+            }
+
+            .MuiTypography-root {
+                color: #ffffff;
+            }
+
+            .MuiButtonBase-root{
+                color: #ffffff;
+                &.Mui-disabled {
+                    color: rgba(255, 255, 255, 0.6);
+                }
+
+                &.MuiButton-containedSecondary {
+                    color: #000000;
+                }
+            }
+
+
+            .MuiOutlinedInput-root {
+                color: rgba(255, 255, 255, 0.87);
+
+                .MuiInputAdornment-root p{
+                    color: #ffffff;
+                }
+
+                .MuiOutlinedInput-notchedOutline {
+                    border-color: #ffffff;
+                }
+
+            }
+
+            .MuiFormControlLabel-root{
+
+                .Mui-disabled {
+                    color: rgba(255, 255, 255, 0.38);
+                }
+
+                .MuiSvgIcon-root{
+                    fill: #ffffff;
+                }
+            }
+
+            h6{
+                color: #ffffff;
+            }
+
+            &.field-array .row {
+                border: 1px dashed #ffffff;
+            }
+
+
+            &.field-heatmap_calendar{
+                h2, 
+                h3{
+                    color: #ffffff;
+                }
+
+                .HeatmapCalendarChart {
+                    rect {
+                        stroke: #333333;
+                    }
+
+                    .legend text{
+                        fill: #ffffff;
+                    }
+                }
+            }
+
+            &.field-polygon_man{
+                .legend{
+                    .legendItem{
+                        stroke: #afaaae;
+
+                        &.active{
+                            stroke: #ffffff;
+                        }
+                    }
+
+                    text{
+                        fill: #ffffff;
+                    }                    
+                }
+            }
+
+        }
+
+        .MuiChip-root{
+            color: #ffffff;
+        }
+
+
+    }
+
+}
